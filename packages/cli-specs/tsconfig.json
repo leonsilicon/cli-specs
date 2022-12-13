@@ -2,6 +2,7 @@
 	"extends": "lionconfig/tsconfig",
 	"compilerOptions": {
 		"outDir": "dist",
+		"declarationDir": "dist",
 		"baseUrl": ".",
 		"rootDir": "src",
 		"paths": {
