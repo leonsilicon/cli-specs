@@ -6,12 +6,12 @@ import { execa } from 'execa'
 import onetime from 'onetime'
 import renameFunction from 'rename-fn'
 import shellQuote from 'shell-quote'
-import type { EmptyObject, Promisable, Writable } from 'type-fest'
+import type { Promisable, Writable } from 'type-fest'
 
 import type { CliTool } from '~/types/cli.js'
 
 export function defineCliTool<
-	ExtraOptions extends Record<string, unknown> = EmptyObject
+	ExtraOptions extends Record<string, unknown> = Record<string, unknown>
 >(args: {
 	commandName: string
 	description: string

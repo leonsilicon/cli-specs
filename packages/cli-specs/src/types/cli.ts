@@ -3,10 +3,10 @@ import type {
 	ExecaReturnValue,
 	Options as ExecaOptions,
 } from 'execa'
-import type { EmptyObject, Promisable } from 'type-fest'
+import type { Promisable } from 'type-fest'
 
 export interface CliTool<
-	ExtraOptions extends Record<string, unknown> = EmptyObject
+	ExtraOptions extends Record<string, unknown> = Record<string, unknown>
 > {
 	(
 		command: string | string[],
