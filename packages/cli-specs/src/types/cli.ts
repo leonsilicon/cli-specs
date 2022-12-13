@@ -6,7 +6,8 @@ import type {
 import type { Promisable } from 'type-fest'
 
 export interface CliTool<
-	ExtraOptions extends Record<string, unknown> = Record<string, unknown>
+	// eslint-disable-next-line @typescript-eslint/ban-types
+	ExtraOptions extends Record<string, unknown> = {}
 > {
 	(
 		command: string | string[],

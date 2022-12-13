@@ -11,7 +11,8 @@ import type { Promisable, Writable } from 'type-fest'
 import type { CliTool } from '~/types/cli.js'
 
 export function defineCliTool<
-	ExtraOptions extends Record<string, unknown> = Record<string, unknown>
+	// eslint-disable-next-line @typescript-eslint/ban-types
+	ExtraOptions extends Record<string, unknown> = {}
 >(args: {
 	commandName: string
 	description: string
