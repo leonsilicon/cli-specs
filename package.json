@@ -1,0 +1,11 @@
+{
+	"name": "@cli-specs/monorepo",
+	"scripts": {
+		"prepare": "lionconfig"
+	},
+	"devDependencies": {
+		"lionconfig": "latest",
+		"@types/node": "latest",
+		"typescript": "latest"
+	}
+}
