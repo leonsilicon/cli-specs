@@ -1,5 +1,15 @@
-import { test } from 'vitest';
+import { expect, test } from 'vitest'
 
-test('my test', () => {
-	// Your tests go here
-});
+import { defineCliTool } from '~/index.js'
+
+test('default execa options can be lazy', () => {
+	expect(() =>
+		defineCliTool({
+			commandName: 'foo',
+			description: 'foo',
+			defaultExecaOptions() {
+				throw new Error('should not be thrown')
+			},
+		})
+	).to.not.throw()
+})

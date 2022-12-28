@@ -16,7 +16,7 @@ export function defineCliTool<
 >(args: {
 	commandName: string
 	description: string
-	defaultExecaOptions: Partial<ExecaOptions>
+	defaultExecaOptions: Partial<ExecaOptions> | (() => Partial<ExecaOptions>)
 	augmentArguments?(
 		args: string[],
 		options?: ExecaOptions & ExtraOptions
@@ -70,8 +70,7 @@ export function defineCliTool<
 				: (shellQuote.parse(command) as string[])),
 		]
 
-		const defaultExecaOptions =
-			args.defaultExecaOptions as Writable<ExecaOptions>
+		let defaultExecaOptions = (typeof args.defaultExecaOptions === 'function' ? args.defaultExecaOptions() : args.defaultExecaOptions) as Writable<ExecaOptions>
 		if (
 			(defaultExecaOptions.stdout !== undefined ||
 				defaultExecaOptions.stderr !== undefined ||
@@ -96,7 +95,7 @@ export function defineCliTool<
 		if (args.runCommand === undefined) {
 			execaProcess = execa(args.commandName, execaArguments, execaOptions)
 		} else {
-			;({ process: execaProcess } = await args.runCommand(
+			; ({ process: execaProcess } = await args.runCommand(
 				execaArguments,
 				execaOptions
 			))
