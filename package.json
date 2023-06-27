@@ -18,6 +18,7 @@
 	"scripts": {
 		"build": "ts-node ./scripts/build.ts",
 		"start": "ts-node ./src/index.ts",
+		"release": "lionp",
 		"test": "vitest run"
 	},
 	"devDependencies": {
