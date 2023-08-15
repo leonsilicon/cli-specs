@@ -1,5 +1,6 @@
+import fs from 'node:fs'
+
 import boxen from 'boxen'
-import commandExists from 'command-exists'
 import { deepmerge } from 'deepmerge-ts'
 import type { ExecaChildProcess, Options as ExecaOptions } from 'execa'
 import { execa } from 'execa'
@@ -8,13 +9,14 @@ import renameFunction from 'rename-fn'
 import shellQuote from 'shell-quote'
 import type { Promisable, Writable } from 'type-fest'
 
-import type { CliTool } from '~/types/cli.js'
+import type { CliExecutable } from '~/types/cli.js'
 
-export function defineCliTool<
+export function defineCliExecutable<
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	ExtraOptions extends Record<string, unknown> = {}
 >(args: {
-	commandName: string
+	executableName: string
+	executablePath: string | (() => string)
 	description: string
 	defaultExecaOptions: Partial<ExecaOptions> | (() => Partial<ExecaOptions>)
 	augmentArguments?(
@@ -27,16 +29,28 @@ export function defineCliTool<
 	): { process: ExecaChildProcess } | Promise<{ process: ExecaChildProcess }>
 	exists?(): Promisable<boolean>
 	install?(): Promisable<void>
-}): CliTool<ExtraOptions> {
+}): CliExecutable<ExtraOptions> {
 	let _doesCliToolExist = false
 	const doesCliToolExist = onetime(
-		args.exists ?? (() => commandExists.sync(args.commandName))
+		args.exists ??
+			(() => {
+				const executablePath =
+					typeof args.executablePath === 'function'
+						? args.executablePath()
+						: args.executablePath
+				return fs.existsSync(executablePath)
+			})
 	)
 
-	const cliTool_getProcess = async (
+	const cliExecutable_getProcess = async (
 		command: string | string[],
 		options?: ExecaOptions & ExtraOptions
 	) => {
+		const executablePath =
+			typeof args.executablePath === 'function'
+				? args.executablePath()
+				: args.executablePath
+
 		if (!_doesCliToolExist && !doesCliToolExist()) {
 			if (args.install === undefined) {
 				process.stderr.write(
@@ -46,12 +60,12 @@ export function defineCliTool<
 						padding: 1,
 					})
 				)
-				throw new Error(`Missing CLI tool: ${args.commandName}`)
+				throw new Error(`Missing CLI executable: ${executablePath}`)
 			} else {
 				try {
 					await args.install()
 					_doesCliToolExist = true
-				} catch {
+				} catch (error: any) {
 					process.stderr.write(
 						boxen(args.description, {
 							textAlignment: 'center',
@@ -59,7 +73,10 @@ export function defineCliTool<
 							padding: 1,
 						})
 					)
-					throw new Error(`Missing CLI tool: ${args.commandName}`)
+
+					throw new Error(
+						`Failed to install CLI executable: ${error.message as string}`
+					)
 				}
 			}
 		}
@@ -97,7 +114,7 @@ export function defineCliTool<
 
 		let execaProcess: ExecaChildProcess
 		if (args.runCommand === undefined) {
-			execaProcess = execa(args.commandName, execaArguments, execaOptions)
+			execaProcess = execa(executablePath, execaArguments, execaOptions)
 		} else {
 			;({ process: execaProcess } = await args.runCommand(
 				execaArguments,
@@ -125,18 +142,21 @@ export function defineCliTool<
 		command: string | string[],
 		options?: ExecaOptions & ExtraOptions
 	) => {
-		const { process } = await cliTool_getProcess(command, options)
+		const { process } = await cliExecutable_getProcess(command, options)
 		const result = await process
 		return result
 	}
 
-	renameFunction(cliTool, args.commandName)
+	renameFunction(cliTool, args.executableName)
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 	return Object.assign(cliTool, {
-		getProcess: cliTool_getProcess,
+		getProcess: cliExecutable_getProcess,
 		exists: doesCliToolExist,
-		commandName: args.commandName,
+		getExecutablePath:
+			typeof args.executablePath === 'function'
+				? args.executablePath
+				: () => args.executablePath,
+		executableName: args.executableName,
 		description: args.description,
 		install: args.install,
 	}) as any

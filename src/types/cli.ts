@@ -5,7 +5,7 @@ import type {
 } from 'execa'
 import type { Promisable } from 'type-fest'
 
-export interface CliTool<
+export interface CliExecutable<
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	ExtraOptions extends Record<string, unknown> = {}
 > {
@@ -13,12 +13,13 @@ export interface CliTool<
 		command: string | string[],
 		options?: ExecaOptions & ExtraOptions
 	): Promise<ExecaReturnValue>
-	commandName: string
 	description: string
+	executableName: string
 	exists(): Promisable<boolean>
 	install(): Promisable<void>
 	getProcess(
 		command: string | string[],
 		options?: ExecaOptions & ExtraOptions
 	): Promise<{ process: ExecaChildProcess }>
+	getExecutablePath(): string
 }
