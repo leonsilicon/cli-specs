@@ -16,7 +16,7 @@ export function defineCliExecutable<
 	ExtraOptions extends Record<string, unknown> = {}
 >(args: {
 	executableName: string
-	executablePath: string | (() => string)
+	executablePath: string | (() => Promisable<string>)
 	description: string
 	defaultExecaOptions: Partial<ExecaOptions> | (() => Partial<ExecaOptions>)
 	augmentArguments?(
@@ -33,10 +33,10 @@ export function defineCliExecutable<
 	let _doesCliToolExist = false
 	const doesCliToolExist = onetime(
 		args.exists ??
-			(() => {
+			(async () => {
 				const executablePath =
 					typeof args.executablePath === 'function'
-						? args.executablePath()
+						? await args.executablePath()
 						: args.executablePath
 				return fs.existsSync(executablePath)
 			})
@@ -48,10 +48,10 @@ export function defineCliExecutable<
 	) => {
 		const executablePath =
 			typeof args.executablePath === 'function'
-				? args.executablePath()
+				? await args.executablePath()
 				: args.executablePath
 
-		if (!_doesCliToolExist && !doesCliToolExist()) {
+		if (!_doesCliToolExist && !(await doesCliToolExist())) {
 			if (args.install === undefined) {
 				process.stderr.write(
 					boxen(args.description, {

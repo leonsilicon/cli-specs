@@ -1,6 +1,6 @@
 # cli-specs
 
-`cli-specs` is a utility for defining CLI tools that should be called from JavaScript.
+`cli-specs` is a utility for defining CLI executables that should be called from JavaScript.
 
 ## Usage
 
@@ -13,16 +13,16 @@ npm install cli-specs
 Then, import and use `cli-specs` in your project like in the following example:
 
 ```javascript
-import { defineCliTool, installHomebrewPackage } from 'cli-specs'
+import { defineCliExecutable } from 'cli-specs'
 import { outdent } from 'outdent'
 
-const git = defineCliTool({
-  commandName: 'git',
+const git = defineCliExecutable({
+  executableName: 'git',
+  executablePath: '/usr/bin/git',
   description: outdent`
     \`git\` is the version control system that is needed
-    for Dialect development.
+    for development.
   `,
-  install: async () => installHomebrewPackage('git'),
   defaultExecaOptions: {
     stdout: 'inherit',
     stderr: 'inherit'

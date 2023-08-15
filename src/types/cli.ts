@@ -21,5 +21,5 @@ export interface CliExecutable<
 		command: string | string[],
 		options?: ExecaOptions & ExtraOptions
 	): Promise<{ process: ExecaChildProcess }>
-	getExecutablePath(): string
+	getExecutablePath(): Promisable<string>
 }
